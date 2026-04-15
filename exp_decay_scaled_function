@@ -1,1 +1,18 @@
+from scipy.spatial.distance import squareform, pdist
 
+def exp_decay_scaled(data, file_path, gamma=3, threshold=0.8):
+    
+    '''
+    进行指数衰减操作，将指标转化为相似度指标，相似度过低的边直接置0
+    '''
+    #转化为相似性指标
+    similarity_matrix = np.exp(-gamma * data)
+    
+    similarity_matrix[similarity_matrix < threshold] = 0.0
+
+    #将基因与自身的相似度置为0，符合神经网络需要
+    np.fill_diagonal(similarity_matrix, 0) 
+
+    print(f"{file_path} -keep data density: {(similarity_matrix > 0).sum() / similarity_matrix.size:.2%}")
+
+    return similarity_matrix

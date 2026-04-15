@@ -1,1 +1,30 @@
+def compute_diffusion_distance_from_coords(data,  t=5):
 
+'''
+data：原始基因表达矩阵数据
+t:随机游走步长
+'''
+    dmap = dm.DiffusionMap.from_sklearn(
+            alpha=0.5,          # 密度归一化指数
+            k=30,               # 近邻数
+            kernel_type='gaussian',  # 高斯核
+            epsilon='bgh',      # 自动估算带宽
+            n_evecs=100,
+            metric='cosine'  #使用余弦距离
+    )
+    
+    dmap = dmap.fit(data)
+    
+    n_samples = dmap.dmap.shape[0]
+    
+    D_squared = np.zeros((n_samples, n_samples))
+
+    #根据论文中计算公式和源码，获取流形距离矩阵计算方式
+
+    for i in range(n_samples):
+        
+        diff = dmap.dmap[i, :] - dmap.dmap #compute gene i and other genes diff
+        
+        D_squared[i, :] = np.sum(diff ** 2, axis=1)
+    
+    return np.sqrt(D_squared)
